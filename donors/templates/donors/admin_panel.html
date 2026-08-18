@@ -1,0 +1,122 @@
+{% extends 'donors/base.html' %}
+{% load static %}
+
+{% block title %}User Access Admin Panel - SBVM Vinayaka{% endblock %}
+
+{% block page_header_title %}Superuser Access Management Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid" style="max-width: 1000px; margin: 0 auto; padding-top: 10px;">
+    
+    <!-- PAGE TITLE CARD -->
+    <div class="card" style="background: linear-gradient(135deg, #1e293b, #0f172a); border-left: 5px solid #f39c12; margin-bottom: 25px;">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap" style="padding: 20px 25px; gap: 15px;">
+            <div>
+                <h2 style="color: #fff; font-size: 20px; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-user-gear" style="color: #f39c12;"></i> Website Access Control Panel
+                </h2>
+                <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;">
+                    Manage authorized usernames permitted to log into the website without a password.
+                </p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="/admin/" target="_blank" class="btn" style="background: rgba(255,255,255,0.1); color: #e2e8f0; font-size: 13px; font-weight: 500;">
+                    <i class="fa-solid fa-gears"></i> Django Admin Site
+                </a>
+                <a href="{% url 'admin_logout' %}" class="btn logout-trigger" onclick="return confirm('Are you sure you want to log out of Admin?');" style="background: #e74c3c; color: white; font-size: 13px; font-weight: 500;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout Admin
+                </a>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD USER CARD -->
+    <div class="card" style="margin-bottom: 30px;">
+        <div class="card-header" style="background: #1e293b; color: #fff; padding: 14px 20px;">
+            <h3 style="font-size: 15px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-user-plus" style="color: #2ecc71;"></i> Authorize New Website User
+            </h3>
+        </div>
+        <div class="card-body" style="padding: 20px;">
+            <form action="{% url 'admin_add_user' %}" method="POST" class="d-flex align-items-center flex-wrap" style="gap: 15px;">
+                {% csrf_token %}
+                <div style="flex: 1; min-width: 250px;">
+                    <label for="new_user_input" style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-bottom: 6px; display: block;">
+                        New Username
+                    </label>
+                    <div style="position: relative;">
+                        <span style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8;">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" name="username" id="new_user_input" class="form-control" placeholder="e.g. mahesh, ramu, etc." required style="padding-left: 40px;" autocomplete="off">
+                    </div>
+                </div>
+                <div style="align-self: flex-end;">
+                    <button type="submit" class="btn btn-accent" style="padding: 10px 24px; font-weight: 600;">
+                        <i class="fa-solid fa-plus-circle" style="margin-right: 6px;"></i> Add Allowed User
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ALLOWED USERS TABLE LIST -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background: #1e293b; color: #fff; padding: 14px 20px;">
+            <h3 style="font-size: 15px; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-users-gear" style="color: #3498db;"></i> Currently Authorized Usernames ({{ users|length }})
+            </h3>
+        </div>
+        <div class="card-body" style="padding: 0;">
+            {% if users %}
+                <div class="table-responsive">
+                    <table class="table" style="margin-bottom: 0; font-size: 14px;">
+                        <thead>
+                            <tr style="background: #0f172a; color: #94a3b8;">
+                                <th style="padding: 12px 20px;">#</th>
+                                <th style="padding: 12px 20px;">Username</th>
+                                <th style="padding: 12px 20px;">Authentication Mode</th>
+                                <th style="padding: 12px 20px;">Date Authorized</th>
+                                <th style="padding: 12px 20px; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in users %}
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding: 14px 20px; color: #64748b;">{{ forloop.counter }}</td>
+                                    <td style="padding: 14px 20px;">
+                                        <span class="badge" style="background: linear-gradient(135deg, #3498db, #2980b9); color: white; font-size: 13px; font-weight: 600; padding: 6px 14px; border-radius: 20px;">
+                                            <i class="fa-solid fa-user-check" style="margin-right: 6px;"></i> {{ u.username }}
+                                        </span>
+                                    </td>
+                                    <td style="padding: 14px 20px; color: #94a3b8; font-size: 13px;">
+                                        <i class="fa-solid fa-shield-halved" style="color: #2ecc71; margin-right: 5px;"></i> Passwordless (Case-Insensitive)
+                                    </td>
+                                    <td style="padding: 14px 20px; color: #94a3b8; font-size: 13px;">
+                                        {{ u.created_at|date:"M d, Y h:i A" }}
+                                    </td>
+                                    <td style="padding: 14px 20px; text-align: right;">
+                                        <form action="{% url 'admin_delete_user' u.pk %}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to revoke access for user \'{{ u.username }}\'?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm" style="background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid rgba(231,76,60,0.3); padding: 5px 12px; font-size: 12px; font-weight: 600; border-radius: 6px;">
+                                                <i class="fa-solid fa-trash-can" style="margin-right: 4px;"></i> Revoke Access
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="padding: 40px; text-align: center; color: #94a3b8;">
+                    <i class="fa-solid fa-user-slash" style="font-size: 36px; color: #64748b; margin-bottom: 12px;"></i>
+                    <p style="margin: 0; font-size: 15px;">No allowed users registered yet. Use the form above to add users.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

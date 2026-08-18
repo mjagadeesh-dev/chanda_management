@@ -1,0 +1,183 @@
+{% extends 'donors/base.html' %}
+{% load static %}
+
+{% block title %}{{ title }} - SBVM Vinayaka Association{% endblock %}
+
+{% block nav_all %}active{% endblock %}
+
+{% block page_header_title %}Edit Donor Record{% endblock %}
+
+{% block content %}
+    <div class="data-card">
+        <div class="card-header-custom">
+            <span class="card-title-custom">
+                <i class="fa-solid fa-user-pen" style="color: var(--primary-color);"></i>
+                Modify Donor Details: {{ donor.name }}
+            </span>
+        </div>
+        
+        <div class="card-body-custom">
+            <form method="POST" id="donor-form" novalidate>
+                {% csrf_token %}
+                
+                <!-- Display Non-Field Errors -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-error">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                
+                <div class="form-row">
+                    <!-- Donor Name -->
+                    <div class="form-group">
+                        <label for="id_name">Donor Name <span style="color: var(--color-danger);">*</span></label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                            <div style="color: var(--color-danger); font-size: 12px; margin-top: 4px;">
+                                {{ form.name.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Mobile Number -->
+                    <div class="form-group">
+                        <label for="id_mobile_number">Mobile Number (Indian Format) <span style="color: var(--color-danger);">*</span></label>
+                        {{ form.mobile_number }}
+                        {% if form.mobile_number.errors %}
+                            <div style="color: var(--color-danger); font-size: 12px; margin-top: 4px;">
+                                {{ form.mobile_number.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <!-- Email (Optional) -->
+                    <div class="form-group">
+                        <label for="id_email">Email Address (Optional)</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div style="color: var(--color-danger); font-size: 12px; margin-top: 4px;">
+                                {{ form.email.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Chanda Amount -->
+                    <div class="form-group">
+                        <label for="id_amount">Chanda/Donation Amount (₹) <span style="color: var(--color-danger);">*</span></label>
+                        {{ form.amount }}
+                        {% if form.amount.errors %}
+                            <div style="color: var(--color-danger); font-size: 12px; margin-top: 4px;">
+                                {{ form.amount.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Google Maps Geolocation Address -->
+                <div class="form-group">
+                    <label for="search-address-input">Donor Address (Exact GPS Location) <span style="color: var(--color-danger);">*</span></label>
+                    <div class="address-input-wrapper d-flex" style="gap: 10px; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 200px;">
+                            {{ form.address }}
+                        </div>
+                        <button type="button" id="locate-btn" class="btn btn-secondary" style="padding: 10px 18px; display: flex; align-items: center; gap: 8px;" title="Fetch Current GPS Location">
+                            <i class="fa-solid fa-location-crosshairs"></i> Get GPS Address
+                        </button>
+                    </div>
+                    <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 6px;">
+                        <i class="fa-solid fa-circle-info"></i> Click the <strong>Get GPS Address</strong> button to automatically retrieve your current coordinates and street address.
+                    </span>
+                    {% if form.address.errors %}
+                        <div style="color: var(--color-danger); font-size: 12px; margin-top: 4px;">
+                            {{ form.address.errors.0 }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Hidden inputs for coordinates populated by Maps Javascript -->
+                {{ form.latitude }}
+                {{ form.longitude }}
+                {{ form.google_place_id }}
+
+                <div class="form-row">
+                    <!-- Payment Status -->
+                    <div class="form-group">
+                        <label for="id_payment_status">Payment Status <span style="color: var(--color-danger);">*</span></label>
+                        {{ form.payment_status }}
+                    </div>
+                    
+                    <!-- Payment Date (Dynamic display toggled via JavaScript) -->
+                    <div class="form-group" id="payment-date-group">
+                        <label for="id_payment_date">Payment Date & Time</label>
+                        {{ form.payment_date }}
+                        {% if form.payment_date.errors %}
+                            <div style="color: var(--color-danger); font-size: 12px; margin-top: 4px;">
+                                {{ form.payment_date.errors.0 }}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="d-flex form-actions-wrapper" style="gap: 12px; margin-top: 20px; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i> SAVE CHANGES
+                    </button>
+                    <a href="{% url 'donor_detail' donor.id %}" class="btn btn-outline">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    <!-- Include maps.js -->
+    <script src="{% static 'donors/js/maps.js' %}"></script>
+    
+    <!-- Include Google Maps API Script securely using key from context processor -->
+    {% if GOOGLE_MAPS_API_KEY %}
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places&callback=initAutocomplete" async defer></script>
+    {% else %}
+        <script>
+            console.warn("Google Maps API Key missing in environment! Autocomplete will fallback to standard text search.");
+        </script>
+    {% endif %}
+
+    <!-- Dynamic Payment Date Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.getElementById('id_payment_status');
+            const dateGroup = document.getElementById('payment-date-group');
+            const dateInput = document.getElementById('id_payment_date');
+
+            function formatLocalDateTime(date) {
+                const tzoffset = date.getTimezoneOffset() * 60000;
+                const localISOTime = (new Date(date - tzoffset)).toISOString().slice(0, 16);
+                return localISOTime;
+            }
+
+            function toggleDateGroup() {
+                if (statusSelect.value === 'PAID') {
+                    dateGroup.style.display = 'block';
+                    if (!dateInput.value) {
+                        dateInput.value = formatLocalDateTime(new Date());
+                    }
+                } else {
+                    dateGroup.style.display = 'none';
+                    dateInput.value = '';
+                }
+            }
+
+            // Bind triggers
+            statusSelect.addEventListener('change', toggleDateGroup);
+            
+            // Run initially
+            toggleDateGroup();
+        });
+    </script>
+{% endblock %}

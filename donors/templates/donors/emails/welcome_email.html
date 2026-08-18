@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chanda Receipt & Festival Invitation - SBVM Youth Adoni</title>
+    <style>
+        body {
+            font-family: 'Outfit', 'Poppins', 'Segoe UI', Arial, sans-serif;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            color: #1e293b;
+        }
+        .email-wrapper {
+            max-width: 600px;
+            margin: 25px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+        }
+        .header-banner {
+            background: linear-gradient(135deg, #d35400 0%, #e67e22 50%, #f39c12 100%);
+            padding: 35px 25px;
+            text-align: center;
+            color: #ffffff;
+            position: relative;
+        }
+        .header-banner h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .header-banner p {
+            margin: 6px 0 0 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff3e0;
+            letter-spacing: 0.5px;
+        }
+        .content-body {
+            padding: 35px 30px;
+        }
+        .greeting-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: #b7950b;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .thank-you-box {
+            background: linear-gradient(135deg, #fff9e6, #fff3cd);
+            border-left: 5px solid #f1c40f;
+            border-radius: 10px;
+            padding: 18px 20px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: #7d6608;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        .receipt-card {
+            background: #ffffff;
+            border: 2px dashed #f39c12;
+            border-radius: 12px;
+            padding: 22px;
+            margin: 25px 0;
+        }
+        .receipt-header {
+            font-size: 16px;
+            font-weight: 700;
+            color: #d35400;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #fdebd0;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #fcf3cf;
+        }
+        .receipt-label {
+            color: #64748b;
+            font-weight: 600;
+        }
+        .receipt-value {
+            color: #0f172a;
+            font-weight: 700;
+            text-align: right;
+        }
+        .amount-highlight {
+            color: #27ae60;
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .invitation-banner {
+            background: linear-gradient(135deg, #78281f 0%, #900c3f 100%);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            margin: 25px 0;
+            box-shadow: 0 4px 15px rgba(144, 12, 63, 0.2);
+        }
+        .invitation-banner h3 {
+            margin: 0 0 10px 0;
+            font-size: 18px;
+            color: #f1c40f;
+            font-weight: 700;
+        }
+        .invitation-banner p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #fadbd8;
+        }
+        .venue-box {
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 14px;
+            color: #334155;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .footer {
+            background-color: #0f172a;
+            padding: 25px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+        .footer strong {
+            color: #f39c12;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <!-- HEADER BANNER -->
+        <div class="header-banner">
+            <h1>🚩 SBVM YOUTH ADONI 🚩</h1>
+            <p>Ganesh Chanda Receipt & Celebration Invitation</p>
+        </div>
+
+        <!-- CONTENT BODY -->
+        <div class="content-body">
+            <div class="greeting-text">
+                🙏 Namaste, {{ donor_name }}!
+            </div>
+
+            <div class="thank-you-msg">
+                We extend our heartfelt gratitude for your generous contribution towards the upcoming Vinayaka Chavithi Celebrations. Your support makes this grand community event possible!
+            </div>
+
+            <!-- RECEIPT CARD -->
+            <div class="receipt-card">
+                <div class="receipt-header">
+                    🪔 Official Chanda Receipt
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Donor Name</span>
+                    <span class="receipt-value">{{ donor_name }}</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Contribution Amount</span>
+                    <span class="receipt-value amount-highlight">₹{{ amount }}</span>
+                </div>
+                <div class="receipt-row">
+                    <span class="receipt-label">Payment Status</span>
+                    <span class="receipt-value" style="color: #27ae60;">PAID ✓</span>
+                </div>
+                <div class="receipt-row" style="border-bottom: none;">
+                    <span class="receipt-label">Date & Time</span>
+                    <span class="receipt-value">{{ payment_date|date:"d M Y, h:i A" }}</span>
+                </div>
+            </div>
+
+            <!-- INVITATION BANNER -->
+            <div class="invitation-banner">
+                <h3>🌺 CORDIAL FESTIVAL INVITATION 🌺</h3>
+                <p>
+                    We warmly invite you and your family to join us in seeking the divine blessings of Lord Ganesha during our daily Pujas, Aarti, and Mahaprasadam distribution.
+                </p>
+            </div>
+
+            <div class="venue-box">
+                📅 <strong>Festival Date:</strong> 14th September 2026<br>
+                📍 <strong>Venue:</strong> Hanuman Nagar, Water Tank Line, Adoni
+            </div>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <p style="margin: 0; font-size: 15px; font-weight: 700; color: #b7950b;">
+                    With Warmest Regards,<br>
+                    <span style="font-size: 17px; color: #d35400;">SBVM YOUTH ASSOCIATION, ADONI</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <p><strong>SBVM YOUTH ASSOCIATION</strong> &bull; Hanuman Nagar, Adoni, Andhra Pradesh</p>
+            <p>Thank you for being an integral part of our celebration.</p>
+        </div>
+    </div>
+</body>
+</html>

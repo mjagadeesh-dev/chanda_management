@@ -1,0 +1,156 @@
+{% extends 'donors/base.html' %}
+{% load static %}
+
+{% block title %}Advanced Search - SBVM Vinayaka Association{% endblock %}
+
+{% block nav_search %}active{% endblock %}
+
+{% block page_header_title %}Advanced Global Search{% endblock %}
+
+{% block content %}
+    <!-- FILTER DASHBOARD CONTAINER -->
+    <div class="data-card">
+        <div class="card-header-custom">
+            <span class="card-title-custom">
+                <i class="fa-solid fa-filter" style="color: var(--primary-color);"></i>
+                Filter Donation Records
+            </span>
+        </div>
+        <div class="card-body-custom">
+            <form method="GET" action="{% url 'donor_search' %}">
+                <div class="form-row">
+                    <!-- Text Query -->
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="id_query">Search Query (Name / Phone / Email / Address)</label>
+                        <input type="text" name="q" id="id_query" class="form-control" placeholder="Type search term..." value="{{ query }}">
+                    </div>
+
+                    <!-- Payment Status -->
+                    <div class="form-group">
+                        <label for="id_status">Payment Status</label>
+                        <select name="status" id="id_status" class="form-select">
+                            <option value="ALL" {% if status == 'ALL' or not status %}selected{% endif %}>All Records</option>
+                            <option value="PAID" {% if status == 'PAID' %}selected{% endif %}>Paid Donors Only</option>
+                            <option value="DUE" {% if status == 'DUE' %}selected{% endif %}>Due Donors Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row" style="margin-top: 10px;">
+                    <!-- Min Amount -->
+                    <div class="form-group">
+                        <label for="id_min_amount">Min Amount (₹)</label>
+                        <input type="number" name="min_amount" id="id_min_amount" class="form-control" placeholder="Min" value="{{ min_amount }}">
+                    </div>
+
+                    <!-- Max Amount -->
+                    <div class="form-group">
+                        <label for="id_max_amount">Max Amount (₹)</label>
+                        <input type="number" name="max_amount" id="id_max_amount" class="form-control" placeholder="Max" value="{{ max_amount }}">
+                    </div>
+
+                    <!-- Start Date -->
+                    <div class="form-group">
+                        <label for="id_start_date">Registered From</label>
+                        <input type="date" name="start_date" id="id_start_date" class="form-control" value="{{ start_date }}">
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="form-group">
+                        <label for="id_end_date">Registered To</label>
+                        <input type="date" name="end_date" id="id_end_date" class="form-control" value="{{ end_date }}">
+                    </div>
+                </div>
+
+                <div class="d-flex" style="gap: 12px; margin-top: 15px; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa-solid fa-magnifying-glass"></i> APPLY FILTERS
+                    </button>
+                    <a href="{% url 'donor_search' %}" class="btn btn-outline">
+                        Reset Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SEARCH RESULTS DATA CARD -->
+    <div class="data-card">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <span class="card-title-custom">
+                <i class="fa-solid fa-list-check" style="color: var(--primary-color);"></i>
+                Search Results ({{ total_results }} Found)
+            </span>
+        </div>
+        <div class="card-body-custom">
+            {% if donors %}
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th class="text-right">Amount</th>
+                                <th>Google Maps Address</th>
+                                <th>Date Registered</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donor in donors %}
+                                <tr>
+                                    <td><strong>{{ donor.name }}</strong></td>
+                                    <td>{{ donor.mobile_number }}</td>
+                                    <td class="text-right"><strong>₹{{ donor.amount }}</strong></td>
+                                    <td>
+                                        {% if donor.latitude and donor.longitude %}
+                                            <a href="https://www.google.com/maps/search/?api=1&query={{ donor.latitude }},{{ donor.longitude }}" target="_blank" class="address-link">
+                                                <i class="fa-solid fa-location-dot"></i> {{ donor.address|truncatechars:45 }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted"><i class="fa-solid fa-map-pin"></i> {{ donor.address|truncatechars:45 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ donor.created_at|date:"d-m-Y" }}</td>
+                                    <td>
+                                        {% if donor.payment_status == 'PAID' %}
+                                            <span class="badge badge-paid">
+                                                <i class="fa-solid fa-circle-check"></i> PAID
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-due">
+                                                <i class="fa-solid fa-circle-exclamation"></i> DUE
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="actions-cell">
+                                        <!-- View Details -->
+                                        <a href="{% url 'donor_detail' donor.id %}" class="btn btn-sm btn-outline" title="View Details">
+                                            <i class="fa-solid fa-eye"></i> View
+                                        </a>
+
+                                        <!-- Mark as Paid POST button if status is DUE -->
+                                        {% if donor.payment_status == 'DUE' %}
+                                            <form action="{% url 'donor_mark_paid' donor.id %}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to mark this donation as PAID?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fa-solid fa-check"></i> Mark Paid
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size: 40px; margin-bottom: 12px; opacity: 0.3;"></i>
+                    <p>No donor records matched your search filters.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

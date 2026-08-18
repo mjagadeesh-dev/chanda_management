@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SBVM Vinayaka Association{% endblock %}</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- App main stylesheet -->
+    <link rel="stylesheet" href="{% static 'donors/css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+
+    <!-- SIDEBAR BACKDROP OVERLAY FOR MOBILE/TABLET DRAWER -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <div class="app-container">
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar">
+            <div class="brand-section">
+                <!-- SBVM YOUTH ADONI Logo -->
+                <img src="{% static 'donors/images/sbvm_youth_logo.png' %}?v=2" alt="SBVM Youth Logo" class="brand-logo">
+
+                <div class="brand-title-wrap">
+                    <span class="brand-name">SBVM YOUTH</span>
+                    <span class="brand-sub">Association, Adoni</span>
+
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <!-- Dashboard -->
+                <li class="nav-item {% block nav_dashboard %}{% endblock %}">
+                    <a href="{% url 'dashboard' %}" class="nav-link">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <!-- Add Donation -->
+                <li class="nav-item {% block nav_add %}{% endblock %}">
+                    <a href="{% url 'donor_add' %}" class="nav-link">
+                        <i class="fa-solid fa-circle-plus"></i>
+                        <span>Add Donation</span>
+                    </a>
+                </li>
+
+                <!-- Paid Donors (Count dynamically injected by context processor) -->
+                <li class="nav-item {% block nav_paid %}{% endblock %}">
+                    <a href="{% url 'donor_list_paid' %}" class="nav-link">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Paid</span>
+                        <span class="nav-badge paid-badge">{{ nav_paid_count }}</span>
+                    </a>
+                </li>
+
+                <!-- Due Donors (Count dynamically injected by context processor) -->
+                <li class="nav-item {% block nav_due %}{% endblock %}">
+                    <a href="{% url 'donor_list_due' %}" class="nav-link">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        <span>Due</span>
+                        <span class="nav-badge due-badge">{{ nav_due_count }}</span>
+                    </a>
+                </li>
+
+                <!-- All Donors -->
+                <li class="nav-item {% block nav_all %}{% endblock %}">
+                    <a href="{% url 'donor_list_all' %}" class="nav-link">
+                        <i class="fa-solid fa-users"></i>
+                        <span>All Donors</span>
+                    </a>
+                </li>
+
+                <!-- Global Advanced Search -->
+                <li class="nav-item {% block nav_search %}{% endblock %}">
+                    <a href="{% url 'donor_search' %}" class="nav-link">
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+                        <span>Advanced Search</span>
+                    </a>
+                </li>
+
+                {% if request.user.is_superuser %}
+                <!-- Admin Panel for Superusers -->
+                <li class="nav-item">
+                    <a href="{% url 'admin_panel' %}" class="nav-link" style="color: #f39c12;">
+                        <i class="fa-solid fa-user-gear"></i>
+                        <span>User Admin Panel</span>
+                    </a>
+                </li>
+                {% endif %}
+            </nav>
+
+            <!-- Sidebar Footer -->
+            <div class="sidebar-footer" style="flex-direction: column; align-items: center; text-align: center; gap: 8px;">
+                {% if request.user.is_authenticated %}
+                <div class="admin-info" style="text-align: center;">
+                    <span class="admin-name" style="color: #f39c12; font-weight: 700;">
+                        <i class="fa-solid fa-user-check"></i> {{ request.user.username|title }}
+                    </span>
+                    <span class="admin-role">
+                        {% if request.user.is_superuser %}Superuser Admin{% else %}Authorized Member{% endif %}
+                    </span>
+                </div>
+                <a href="{% url 'logout' %}" class="btn btn-sm logout-trigger" onclick="return confirm('Are you sure you want to log out?');" style="background: rgba(231, 76, 60, 0.2); color: #ff6b6b; border: 1px solid rgba(231, 76, 60, 0.4); border-radius: 6px; font-size: 12px; width: 100%; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 10px;">
+                    <i class="fa-solid fa-right-from-bracket"></i> Logout
+                </a>
+                {% else %}
+                <a href="{% url 'login' %}" class="btn btn-sm btn-accent" style="width: 100%; text-decoration: none; font-size: 12px;">
+                    <i class="fa-solid fa-right-to-bracket"></i> Login
+                </a>
+                {% endif %}
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT WRAPPER -->
+        <div class="main-wrapper">
+
+            <!-- TOP BAR HEADER -->
+            <header class="top-header d-flex justify-content-between align-items-center">
+                <div class="header-left d-flex align-items-center" style="gap: 12px;">
+                    <button type="button" id="mobile-nav-toggle" class="mobile-nav-toggle" aria-label="Toggle Menu">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                    <div class="mobile-brand-title">
+                        <span class="brand-name">SBVM VINAYAKA</span>
+                    </div>
+                    <div class="page-title">
+                        {% block page_header_title %}Dashboard{% endblock %}
+                    </div>
+                </div>
+
+                <!-- Right Header items (Search & User profile status) -->
+                <div class="header-right d-flex align-items-center" style="gap: 15px;">
+                    <form action="{% url 'donor_search' %}" method="GET" class="header-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" name="q" placeholder="Quick search donor..." value="{{ request.GET.q }}">
+                    </form>
+                    {% if request.user.is_authenticated %}
+                    <div class="user-badge d-none d-md-flex align-items-center" style="gap: 8px; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);">
+                        <i class="fa-solid fa-circle-user" style="color: #f39c12; font-size: 16px;"></i>
+                        <span style="font-size: 13px; font-weight: 600; color: #fff;">{{ request.user.username|title }}</span>
+                        <a href="{% url 'logout' %}" class="logout-trigger" onclick="return confirm('Are you sure you want to log out?');" style="color: #e74c3c; margin-left: 5px; font-size: 13px;" title="Logout">
+                            <i class="fa-solid fa-power-off"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </header>
+
+
+            <!-- BODY CONTENT -->
+            <main class="content-body">
+
+                <!-- FLASH MESSAGES SYSTEM -->
+                {% if messages %}
+                <div class="messages-container">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% elif message.tags == 'error' or message.tags == 'danger' %}fa-circle-xmark{% elif message.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"
+                            style="margin-right: 10px;"></i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% block content %}{% endblock %}
+            </main>
+
+            <!-- FOOTER -->
+            <footer class="app-footer">
+                <span>&copy; 2026 SBVM VINAYAKA ASSOCIATION. All Rights Reserved. Hanuman Nagar, Adoni, Andhra
+                    Pradesh.</span>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Responsive Navigation JS -->
+    <script src="{% static 'donors/js/responsive.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

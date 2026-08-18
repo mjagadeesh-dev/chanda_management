@@ -1,0 +1,145 @@
+{% extends 'donors/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - SBVM Vinayaka Association{% endblock %}
+
+{% block nav_dashboard %}active{% endblock %}
+
+{% block page_header_title %}Dashboard Overview{% endblock %}
+
+{% block content %}
+    <!-- SUMMARY METRICS CARDS -->
+    <div class="metrics-grid">
+        <!-- Total Donors -->
+        <div class="metric-card m-total">
+            <div class="metric-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="metric-details">
+                <span class="metric-label">Total Donors</span>
+                <span class="metric-value">{{ total_donors }}</span>
+            </div>
+        </div>
+
+        <!-- Paid Donors -->
+        <div class="metric-card m-paid">
+            <div class="metric-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="metric-details">
+                <span class="metric-label">Paid Donors</span>
+                <span class="metric-value">{{ paid_donors }}</span>
+            </div>
+        </div>
+
+        <!-- Due Donors -->
+        <div class="metric-card m-due">
+            <div class="metric-icon">
+                <i class="fa-solid fa-circle-exclamation"></i>
+            </div>
+            <div class="metric-details">
+                <span class="metric-label">Due Donors</span>
+                <span class="metric-value">{{ due_donors }}</span>
+            </div>
+        </div>
+
+        <!-- Total Collected -->
+        <div class="metric-card m-collected">
+            <div class="metric-icon">
+                <i class="fa-solid fa-indian-rupee-sign"></i>
+            </div>
+            <div class="metric-details">
+                <span class="metric-label">Total Collected</span>
+                <span class="metric-value">₹{{ total_collected|floatformat:2 }}</span>
+            </div>
+        </div>
+
+        <!-- Total Due -->
+        <div class="metric-card m-due-amount">
+            <div class="metric-icon">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="metric-details">
+                <span class="metric-label">Total Due</span>
+                <span class="metric-value">₹{{ total_due|floatformat:2 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RECENT ACTIVITY TABLE CARD -->
+    <div class="data-card">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <span class="card-title-custom">
+                <i class="fa-solid fa-clock-rotate-left" style="color: var(--primary-color);"></i>
+                Recent Donation Activity
+            </span>
+            <a href="{% url 'donor_list_all' %}" class="btn btn-sm btn-outline">
+                View All Donors <i class="fa-solid fa-arrow-right-long" style="margin-left: 4px;"></i>
+            </a>
+        </div>
+        
+        <div class="card-body-custom">
+            {% if recent_donors %}
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Donor Name</th>
+                                <th>Mobile Number</th>
+                                <th class="text-right">Amount</th>
+                                <th>Payment Status</th>
+                                <th>Date Added</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donor in recent_donors %}
+                                <tr>
+                                    <td><strong>{{ donor.name }}</strong></td>
+                                    <td>{{ donor.mobile_number }}</td>
+                                    <td class="text-right"><strong>₹{{ donor.amount }}</strong></td>
+                                    <td>
+                                        {% if donor.payment_status == 'PAID' %}
+                                            <span class="badge badge-paid">
+                                                <i class="fa-solid fa-circle-check"></i> PAID
+                                            </span>
+                                        {% else %}
+                                            <span class="badge badge-due">
+                                                <i class="fa-solid fa-circle-exclamation"></i> DUE
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ donor.created_at|date:"d-m-Y" }}</td>
+                                    <td class="actions-cell">
+                                        <!-- View Details -->
+                                        <a href="{% url 'donor_detail' donor.id %}" class="btn btn-sm btn-outline" title="View Details">
+                                            <i class="fa-solid fa-eye"></i> View
+                                        </a>
+                                        
+                                        <!-- Mark as Paid Action if status is DUE -->
+                                        {% if donor.payment_status == 'DUE' %}
+                                            <form action="{% url 'donor_mark_paid' donor.id %}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to mark this donation as PAID?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-success" title="Mark as Paid">
+                                                    <i class="fa-solid fa-check"></i> Mark Paid
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                    <i class="fa-solid fa-folder-open" style="font-size: 40px; margin-bottom: 12px; opacity: 0.5;"></i>
+                    <p>No donation records found yet.</p>
+                    <a href="{% url 'donor_add' %}" class="btn btn-primary" style="margin-top: 15px;">
+                        <i class="fa-solid fa-plus"></i> Register First Donor
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

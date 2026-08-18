@@ -1,0 +1,70 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SBVM Vinayaka Association</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- App main stylesheet -->
+    <link rel="stylesheet" href="{% static 'donors/css/style.css' %}">
+</head>
+
+<body class="login-container">
+
+    <div class="login-card">
+        <div class="login-header">
+            <!-- SBVM YOUTH ADONI Logo -->
+            <img src="{% static 'donors/images/sbvm_youth_logo.png' %}?v=2" alt="SBVM Youth Logo" class="login-logo">
+
+            <h2>SBVM YOUTH</h2>
+            <p>Ganesh Chanda Collection Manager, Adoni</p>
+
+        </div>
+
+        <div class="login-body">
+            <!-- FLASH MESSAGES SYSTEM FOR LOGIN -->
+            {% if messages %}
+            <div class="messages-container" style="margin-bottom: 15px;">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}" style="padding: 10px 14px; font-size: 13px;">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <form action="{% url 'login' %}" method="POST">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="username"><i class="fa-solid fa-user" style="margin-right: 5px;"></i> Authorized
+                        Username</label>
+                    <input type="text" name="username" id="username" class="form-control"
+                        placeholder="Enter authorized username" required autocomplete="username" autofocus>
+                    <small style="color: #666; font-size: 11px; margin-top: 4px; display: block;">
+                        * Authentication requires registered username only (case-insensitive).
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-accent w-100"
+                    style="margin-top: 15px; padding: 12px; font-weight: 600;">
+                    <i class="fa-solid fa-right-to-bracket" style="margin-right: 8px;"></i> ACCESS WEBSITE
+                </button>
+            </form>
+
+            <div
+                style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: center;">
+                <a href="{% url 'admin_login' %}"
+                    style="color: #f39c12; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-user-shield"></i> Superuser Admin Portal
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

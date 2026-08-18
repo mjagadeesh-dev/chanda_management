@@ -1,0 +1,110 @@
+{% extends 'donors/base.html' %}
+{% load static %}
+
+{% block title %}Paid Donors - SBVM Vinayaka Association{% endblock %}
+
+{% block nav_paid %}active{% endblock %}
+
+{% block page_header_title %}Paid Collections ({{ total_count }}){% endblock %}
+
+{% block content %}
+    <!-- SEARCH & FILTER ROW -->
+    <div class="filter-box d-flex justify-content-between align-items-center" style="flex-wrap: wrap; gap: 12px;">
+        <form method="GET" action="{% url 'donor_list_paid' %}" class="d-flex" style="gap: 10px; width: 100%; max-width: 500px; flex-wrap: wrap;">
+            <input type="text" name="q" class="form-control" placeholder="Search by name, mobile, email, or address..." value="{{ query }}" style="flex: 1; min-width: 200px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-magnifying-glass"></i> Search
+            </button>
+            {% if query %}
+                <a href="{% url 'donor_list_paid' %}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+        <a href="{% url 'donor_add' %}" class="btn btn-secondary">
+            <i class="fa-solid fa-plus"></i> Collect Chanda
+        </a>
+    </div>
+
+    <!-- DATA CARD -->
+    <div class="data-card">
+        <div class="card-body-custom">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th class="text-right">Amount</th>
+                                <th>Google Maps Address</th>
+                                <th>Payment Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donor in page_obj %}
+                                <tr>
+                                    <td><strong>{{ donor.name }}</strong></td>
+                                    <td>{{ donor.mobile_number }}</td>
+                                    <td class="text-right"><strong>₹{{ donor.amount }}</strong></td>
+                                    <td>
+                                        {% if donor.latitude and donor.longitude %}
+                                            <a href="https://www.google.com/maps/search/?api=1&query={{ donor.latitude }},{{ donor.longitude }}" target="_blank" class="address-link">
+                                                <i class="fa-solid fa-location-dot"></i> {{ donor.address|truncatechars:45 }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted"><i class="fa-solid fa-map-pin"></i> {{ donor.address|truncatechars:45 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ donor.payment_date|date:"d-m-Y H:i" }}</td>
+                                    <td>
+                                        <span class="badge badge-paid">
+                                            <i class="fa-solid fa-circle-check"></i> PAID
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'donor_detail' donor.id %}" class="btn btn-sm btn-outline">
+                                            <i class="fa-solid fa-eye"></i> View Details
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAGINATION LINKS -->
+                {% if page_obj.has_other_pages %}
+                    <div class="pagination-container">
+                        <span>Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        <div class="pagination-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1{% if query %}&q={{ query }}{% endif %}" class="pagination-link"><i class="fa-solid fa-angles-left"></i></a>
+                                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link"><i class="fa-solid fa-angle-left"></i></a>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <span class="pagination-link active">{{ num }}</span>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link"><i class="fa-solid fa-angle-right"></i></a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link"><i class="fa-solid fa-angles-right"></i></a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+            {% else %}
+                <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                    <i class="fa-solid fa-circle-check" style="font-size: 40px; margin-bottom: 12px; opacity: 0.3; color: var(--color-success);"></i>
+                    <p>No paid donation records found.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends 'donors/base.html' %}
+{% load static %}
+
+{% block title %}Donor Profile: {{ donor.name }} - SBVM Vinayaka Association{% endblock %}
+
+{% block nav_all %}active{% endblock %}
+
+{% block page_header_title %}Donor Profile Details{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center" style="margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+        <a href="javascript:history.back()" class="btn btn-outline">
+            <i class="fa-solid fa-arrow-left"></i> Back to List
+        </a>
+        <div class="d-flex" style="gap: 10px; flex-wrap: wrap;">
+            <!-- Edit Button -->
+            <a href="{% url 'donor_edit' donor.id %}" class="btn btn-primary">
+                <i class="fa-solid fa-user-pen"></i> Edit Profile
+            </a>
+            
+            <!-- Delete Button -->
+            <a href="{% url 'donor_delete' donor.id %}" class="btn btn-danger">
+                <i class="fa-solid fa-trash"></i> Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="profile-header">
+        <div class="avatar-badge">
+            {{ donor.name|slice:":1"|upper }}
+        </div>
+        <div class="profile-title-wrap">
+            <h2>{{ donor.name }}</h2>
+            <div style="margin-top: 6px;">
+                {% if donor.payment_status == 'PAID' %}
+                    <span class="badge badge-paid"><i class="fa-solid fa-circle-check"></i> PAID</span>
+                {% else %}
+                    <span class="badge badge-due"><i class="fa-solid fa-circle-exclamation"></i> DUE</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-details-grid">
+        <!-- DONATION & CONTACT CARD -->
+        <div class="data-card">
+            <div class="card-header-custom">
+                <span class="card-title-custom">
+                    <i class="fa-solid fa-circle-info" style="color: var(--primary-color);"></i>
+                    Contact & Chanda Information
+                </span>
+            </div>
+            <div class="card-body-custom">
+                <!-- Mobile Number -->
+                <div class="detail-item-box">
+                    <div class="detail-label">Mobile Number</div>
+                    <div class="detail-value">{{ donor.mobile_number }}</div>
+                </div>
+
+                <!-- Email -->
+                <div class="detail-item-box">
+                    <div class="detail-label">Email Address</div>
+                    <div class="detail-value">
+                        {% if donor.email %}
+                            <a href="mailto:{{ donor.email }}">{{ donor.email }}</a>
+                        {% else %}
+                            <span class="text-muted" style="font-style: italic;">Not Provided</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Donation Amount -->
+                <div class="detail-item-box">
+                    <div class="detail-label">Donation / Chanda Amount</div>
+                    <div class="detail-value amt">₹{{ donor.amount }}</div>
+                </div>
+
+                <!-- Payment Status Action -->
+                <div class="detail-item-box">
+                    <div class="detail-label">Payment Status</div>
+                    <div class="detail-value d-flex align-items-center justify-content-between" style="margin-top: 6px;">
+                        <span>
+                            {% if donor.payment_status == 'PAID' %}
+                                Received on {{ donor.payment_date|date:"d M Y H:i" }}
+                            {% else %}
+                                Pending Payment
+                            {% endif %}
+                        </span>
+                        
+                        {% if donor.payment_status == 'DUE' %}
+                            <form action="{% url 'donor_mark_paid' donor.id %}" method="POST" onsubmit="return confirm('Are you sure you want to mark this donation as PAID?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fa-solid fa-check"></i> Mark as Paid
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADDRESS & LOCATION CARD -->
+        <div class="data-card">
+            <div class="card-header-custom">
+                <span class="card-title-custom">
+                    <i class="fa-solid fa-map-location-dot" style="color: var(--primary-color);"></i>
+                    Location Information
+                </span>
+            </div>
+            <div class="card-body-custom">
+                <!-- Address Link -->
+                <div class="detail-item-box">
+                    <div class="detail-label">Formatted Address</div>
+                    <div class="detail-value" style="margin-top: 8px;">
+                        {% if donor.latitude and donor.longitude %}
+                            <a href="https://www.google.com/maps/search/?api=1&query={{ donor.latitude }},{{ donor.longitude }}" target="_blank" class="address-link" title="Open exactly in Google Maps">
+                                <i class="fa-solid fa-location-dot"></i> {{ donor.address }}
+                            </a>
+                            <span style="font-size: 11px; color: var(--text-muted); display: block; margin-top: 6px; font-style: italic;">
+                                <i class="fa-solid fa-circle-info"></i> Click address above to open exact coordinates pin in Google Maps.
+                            </span>
+                        {% else %}
+                            <span class="text-muted"><i class="fa-solid fa-map-pin"></i> {{ donor.address }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Coordinates -->
+                <div class="detail-item-box">
+                    <div class="detail-label">Coordinates (Latitude, Longitude)</div>
+                    <div class="detail-value">
+                        {% if donor.latitude and donor.longitude %}
+                            <code>{{ donor.latitude }}, {{ donor.longitude }}</code>
+                        {% else %}
+                            <span class="text-muted">Not Available</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Google Place ID -->
+                <div class="detail-item-box">
+                    <div class="detail-label">Google Place ID</div>
+                    <div class="detail-value">
+                        {% if donor.google_place_id %}
+                            <code style="font-size: 12px; color: var(--text-muted);">{{ donor.google_place_id }}</code>
+                        {% else %}
+                            <span class="text-muted">Not Available</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION LOG CARD (FOR EMAILS) -->
+    <div class="data-card" style="margin-top: 24px;">
+        <div class="card-header-custom d-flex justify-content-between align-items-center">
+            <span class="card-title-custom">
+                <i class="fa-solid fa-envelope" style="color: var(--primary-color);"></i>
+                Automated Welcome Receipt & Invitation Status
+            </span>
+            <div class="d-flex" style="gap: 8px; flex-wrap: wrap;">
+                {% if donor.payment_status == 'PAID' %}
+                    <a href="{% url 'donor_retry_notification' donor.id %}" class="btn btn-sm btn-outline">
+                        <i class="fa-solid fa-paper-plane"></i> Resend Welcome Notification
+                    </a>
+                    {% if donor.mobile_number %}
+                        <a href="https://api.whatsapp.com/send?phone=91{{ donor.mobile_number|slice:"-10:" }}&text=Dear%20{{ donor.name|urlencode }}%2C%0A%0AThank%20you%20for%20your%20valuable%20contribution%20of%20Rs.%20{{ donor.amount|urlencode }}%20to%20SBVM%20VINAYAKA%20ASSOCIATION.%0A%0AWe%20warmly%20invite%20you%20and%20your%20family%20to%20join%20us%20for%20the%20Ganesh%20Festival%20celebration%20on%2014th%20September%202026%20at%20Hanuman%20Nagar%2C%20Adoni.%0A%0AWith%20Regards%2C%0ASBVM%20VINAYAKA%20ASSOCIATION" target="_blank" class="btn btn-sm btn-outline" style="color: #25D366; border-color: #25D366; background-color: transparent; font-weight: 600;">
+                            <i class="fa-brands fa-whatsapp"></i> Send Manual WhatsApp
+                        </a>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body-custom">
+            <div class="detail-item-box">
+                <div class="detail-label">Welcome Notification Sending Status</div>
+                <div class="detail-value" style="margin-top: 6px;">
+                    {% if donor.payment_status != 'PAID' %}
+                        <span class="text-muted"><i class="fa-solid fa-clock"></i> Pending (Will send once payment status transitions to PAID)</span>
+                    {% elif donor.notification_sent %}
+                        <span style="color: var(--color-success); font-weight: 600;">
+                            <i class="fa-solid fa-circle-check"></i> Sent successfully on {{ donor.notification_sent_at|date:"d M Y H:i" }}
+                        </span>
+                    {% else %}
+                        <span style="color: var(--color-danger); font-weight: 600;">
+                            <i class="fa-solid fa-circle-xmark"></i> Not Sent / Failed to send (Click 'Resend Welcome Notification' above to retry)
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="detail-item-box">
+                <div class="detail-label">System Metadata</div>
+                <div class="detail-value" style="font-size: 13px; color: var(--text-muted); display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 6px;">
+                    <span><strong>Record Created:</strong> {{ donor.created_at|date:"d-m-Y H:i:s" }}</span>
+                    <span><strong>Last Updated:</strong> {{ donor.updated_at|date:"d-m-Y H:i:s" }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

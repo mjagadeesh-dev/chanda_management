@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: chanda-management-app
+    env: python
+    region: singapore
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: PYTHON_VERSION
+        value: "3.11.9"
+      - key: NOTIFICATION_CHANNEL
+        value: "email,whatsapp"

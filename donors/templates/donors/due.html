@@ -1,0 +1,117 @@
+{% extends 'donors/base.html' %}
+{% load static %}
+
+{% block title %}Due Donors - SBVM Vinayaka Association{% endblock %}
+
+{% block nav_due %}active{% endblock %}
+
+{% block page_header_title %}Due/Pending Collections ({{ total_count }}){% endblock %}
+
+{% block content %}
+    <!-- SEARCH & FILTER ROW -->
+    <div class="filter-box d-flex justify-content-between align-items-center" style="flex-wrap: wrap; gap: 12px;">
+        <form method="GET" action="{% url 'donor_list_due' %}" class="d-flex" style="gap: 10px; width: 100%; max-width: 500px; flex-wrap: wrap;">
+            <input type="text" name="q" class="form-control" placeholder="Search pending by name, mobile, or address..." value="{{ query }}" style="flex: 1; min-width: 200px;">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-magnifying-glass"></i> Search
+            </button>
+            {% if query %}
+                <a href="{% url 'donor_list_due' %}" class="btn btn-outline">Clear</a>
+            {% endif %}
+        </form>
+        <a href="{% url 'donor_add' %}" class="btn btn-secondary">
+            <i class="fa-solid fa-plus"></i> Collect Chanda
+        </a>
+    </div>
+
+    <!-- DATA CARD -->
+    <div class="data-card">
+        <div class="card-body-custom">
+            {% if page_obj %}
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th class="text-right">Amount</th>
+                                <th>Google Maps Address</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donor in page_obj %}
+                                <tr>
+                                    <td><strong>{{ donor.name }}</strong></td>
+                                    <td>{{ donor.mobile_number }}</td>
+                                    <td class="text-right"><strong>₹{{ donor.amount }}</strong></td>
+                                    <td>
+                                        {% if donor.latitude and donor.longitude %}
+                                            <a href="https://www.google.com/maps/search/?api=1&query={{ donor.latitude }},{{ donor.longitude }}" target="_blank" class="address-link">
+                                                <i class="fa-solid fa-location-dot"></i> {{ donor.address|truncatechars:45 }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted"><i class="fa-solid fa-map-pin"></i> {{ donor.address|truncatechars:45 }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-due">
+                                            <i class="fa-solid fa-circle-exclamation"></i> DUE
+                                        </span>
+                                    </td>
+                                    <td class="actions-cell">
+                                        <!-- View Details -->
+                                        <a href="{% url 'donor_detail' donor.id %}" class="btn btn-sm btn-outline" title="View Details">
+                                            <i class="fa-solid fa-eye"></i> View
+                                        </a>
+
+                                        <!-- Mark as Paid POST button with confirmation dialog -->
+                                        <form action="{% url 'donor_mark_paid' donor.id %}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to mark this donation as PAID?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="fa-solid fa-check"></i> Mark Paid
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- PAGINATION LINKS -->
+                {% if page_obj.has_other_pages %}
+                    <div class="pagination-container">
+                        <span>Showing page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                        <div class="pagination-links">
+                            {% if page_obj.has_previous %}
+                                <a href="?page=1{% if query %}&q={{ query }}{% endif %}" class="pagination-link"><i class="fa-solid fa-angles-left"></i></a>
+                                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link"><i class="fa-solid fa-angle-left"></i></a>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <span class="pagination-link active">{{ num }}</span>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link">{{ num }}</a>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link"><i class="fa-solid fa-angle-right"></i></a>
+                                <a href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}" class="pagination-link"><i class="fa-solid fa-angles-right"></i></a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+            {% else %}
+                <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                    <i class="fa-solid fa-face-smile" style="font-size: 40px; margin-bottom: 12px; opacity: 0.3; color: var(--color-success);"></i>
+                    <p>All clear! There are no due or pending chanda donations.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

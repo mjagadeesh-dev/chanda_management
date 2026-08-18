@@ -1,0 +1,61 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superuser Admin Login - SBVM Vinayaka</title>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- App main stylesheet -->
+    <link rel="stylesheet" href="{% static 'donors/css/style.css' %}">
+</head>
+<body class="login-container">
+
+    <div class="login-card" style="border-top: 4px solid #e74c3c;">
+        <div class="login-header">
+            <img src="{% static 'donors/images/sbvm_youth_logo.png' %}?v=2" alt="SBVM Youth Logo" class="login-logo">
+
+            <h2>SUPERUSER ADMIN</h2>
+            <p style="color: #e74c3c; font-weight: bold;">User Access Control Management</p>
+        </div>
+        
+        <div class="login-body">
+            {% if messages %}
+                <div class="messages-container" style="margin-bottom: 15px;">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}" style="padding: 10px 14px; font-size: 13px;">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form action="{% url 'admin_login' %}" method="POST">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="username"><i class="fa-solid fa-user-shield" style="margin-right: 5px;"></i> Superuser Name</label>
+                    <input type="text" name="username" id="username" class="form-control" placeholder="Enter superuser username" required autocomplete="username" autofocus>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password"><i class="fa-solid fa-key" style="margin-right: 5px;"></i> Superuser Password</label>
+                    <input type="password" name="password" id="password" class="form-control" placeholder="Enter password" required autocomplete="current-password">
+                </div>
+                
+                <button type="submit" class="btn w-100" style="margin-top: 15px; padding: 12px; font-weight: 600; background: linear-gradient(135deg, #e74c3c, #c0392b); color: white;">
+                    <i class="fa-solid fa-lock" style="margin-right: 8px;"></i> AUTHENTICATE SUPERUSER
+                </button>
+            </form>
+
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: center;">
+                <a href="{% url 'login' %}" style="color: #bbb; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-arrow-left"></i> Back to User Login
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

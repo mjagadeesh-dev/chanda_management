@@ -1,0 +1,55 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environments & Virtual Environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+env*/
+
+# Environment Variables (Secrets)
+.env
+.env.local
+.env.*.local
+
+# Database
+*.sqlite3
+*.sqlite3-journal
+
+# Django Collected Static & Media Uploads
+/staticfiles/
+/media/
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Logs & Temporary files
+*.log
+scratch/
